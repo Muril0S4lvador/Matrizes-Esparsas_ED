@@ -11,7 +11,7 @@ Node *node_construct(data_type value, int line, int column){
     n->column = column;
     n->nextLine = n->nextColumn = NULL;
 
-    node_print(n);
+    // node_print(n);
 
     return n;
 }

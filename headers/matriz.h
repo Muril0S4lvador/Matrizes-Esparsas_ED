@@ -12,11 +12,14 @@ typedef struct{
 
 Matriz *matriz_construct();
 
-void matriz_add_value(Matriz *m, data_type value, int column, int line);
+void matriz_add_value(Matriz *m, data_type value, int line, int column);
+
+void matriz_print(Matriz *m, void (*print_fn)(data_type));
+
+void matriz_dense_print(Matriz *m, void (*print_fn)(data_type));
+
+
 
 void matriz_destroy(Matriz *m);
-
-void matriz_print(Matriz *m);
-
 
 #endif
