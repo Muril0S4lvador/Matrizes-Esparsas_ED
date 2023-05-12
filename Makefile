@@ -1,8 +1,11 @@
-all: clean main run
+all: clean mano run
+
+mano:
+	gcc -o main main.c sources/*.c
 
 objects/node.o: headers/node.h sources/node.c
 	gcc -o objects/node.o sources/node.c -Wall
-    
+
 objects/forwardlist.o: headers/forwardlist.h sources/forwardlist.c
 	gcc -o objects/forwardlist.o sources/forwardlist.c -Wall
 

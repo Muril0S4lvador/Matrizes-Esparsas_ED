@@ -3,9 +3,6 @@
 
 #include "node.h"
 
-#define COLUMN -1
-#define LINE -2
-
 typedef struct{
     Node *head;
 

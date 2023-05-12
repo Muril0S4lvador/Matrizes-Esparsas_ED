@@ -16,6 +16,22 @@ Node *node_construct(data_type value, int line, int column){
     return n;
 }
 
+void node_swap_update(Node *n, int new_coord, int position){
+    Node *aux = n;
+
+    while(aux){
+        if(position == COLUMN){
+            aux->column = new_coord;
+            aux = aux->nextLine;
+
+        } else if(position == LINE){
+            aux->line = new_coord;
+            aux = aux->nextColumn;
+
+        }
+    }
+}
+
 void node_print(Node *n){
     printf("Node:\n");
     printf("Value: %d\n[Line, Column] : [%d, %d]\n", n->value, n->line, n->column);

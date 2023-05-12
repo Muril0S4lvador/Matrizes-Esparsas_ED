@@ -1,6 +1,9 @@
 #ifndef _NODE_H_
 #define _NODE_H_
 
+#define COLUMN -1
+#define LINE -2
+
 typedef int data_type;
 
 typedef struct Node{
@@ -12,6 +15,8 @@ typedef struct Node{
 } Node;
 
 Node *node_construct(data_type value, int line, int column);
+
+void node_swap_update(Node *n, int new_coord, int position);
 
 void node_print(Node *n);
 
