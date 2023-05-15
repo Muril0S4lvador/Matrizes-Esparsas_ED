@@ -4,9 +4,13 @@
 #include "forwardlist.h"
 
 typedef struct{
+    // Ponteiro para as colunas
     ForwardList *Column;
+    // Ponteiro para as linhas
     ForwardList *Line;
+    // Numero de colunas
     int sizeColumn;
+    // Numero de linhas
     int sizeLine;
 } Matriz;
 
@@ -21,6 +25,12 @@ void matriz_print(Matriz *m, void (*print_fn)(data_type));
 void matriz_dense_print(Matriz *m, void (*print_fn)(data_type));
 
 void matriz_swap(Matriz *m, int num1, int num2, int position);
+
+void matriz_swap_columns(Matriz *m, int column1, int column2);
+
+void matriz_swap_lines(Matriz *m, int line1, int line2);
+
+void matriz_sort(Matriz *m, ForwardList *l, int position);
 
 
 

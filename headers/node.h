@@ -7,18 +7,23 @@
 typedef int data_type;
 
 typedef struct Node{
+    // Valor da Coluna
     int column;
+    // Valor da linha
     int line;
+    // Valor do node
     data_type value;
-    struct Node *nextLine;
-    struct Node *nextColumn;
+    // Elemento da proxima linha e mesma coluna
+    struct Node *next_Line;
+    // Elemento da proxima coluna e mesma linha
+    struct Node *next_Column;
 } Node;
 
 Node *node_construct(data_type value, int line, int column);
 
-void node_swap_update(Node *n, int new_coord, int position);
+data_type node_return_value(Node *n, int coord, int position);
 
-void node_print(Node *n);
+void node_swap_update(Node *n1, int new_coord1, Node *n2, int new_coord2, int position);
 
 void node_destroy(Node* n);
 

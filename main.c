@@ -8,34 +8,33 @@ void print_int(data_type data){
 
 int main(){
 
-    int linha = 5, coluna = 5;
+    Matriz *m = matriz_construct(5, 11);
 
-    Matriz *h = matriz_construct(10, 10);
-
-    for(int i = 1; i <= h->sizeLine; i++){
-        for(int j = 1; j <= h->sizeColumn; j++){
-            if(j == i)
-                matriz_set_value(h, (10*i+j), i, j);
-        }
-    }
+    matriz_set_value(m, 3, 1, 8);
+    matriz_set_value(m, 8, 1, 4);
     
-    matriz_dense_print(h, print_int);
+    matriz_set_value(m, 9, 2, 11);
+    matriz_set_value(m, 6, 2, 6);
+    
+    matriz_set_value(m, 2, 3, 1);
+    matriz_set_value(m, 88, 3, 8);
+    
+    matriz_set_value(m, 5, 4, 8);
+    matriz_set_value(m, 7, 4, 3);
 
-    matriz_print(h, print_int);
+    matriz_set_value(m, 1, 5, 4);
+    matriz_set_value(m, 8, 5, 10);
 
-    matriz_swap(h, 1, 5, COLUMN);
-    matriz_swap(h, 2, 4, COLUMN);
+    matriz_print(m, print_int);
+    matriz_dense_print(m, print_int);
 
-    matriz_dense_print(h, print_int);
+    matriz_swap_columns(m, 1, 8);
 
-    matriz_print(h, print_int);
+    matriz_print(m, print_int);
+    matriz_dense_print(m, print_int);
 
-    matriz_swap(h, 2, 4, LINE);
-    matriz_swap(h, 1, 5, LINE);
 
-    matriz_dense_print(h, print_int);
-
-    matriz_destroy(h);
+    matriz_destroy(m);
 
     return 0;
 }
