@@ -12,8 +12,6 @@ ForwardList *forwardlist_construct(int size);
 
 ForwardList *forwardlist_return_list(ForwardList *l, int idx);
 
-void forwardlist_organize(ForwardList *prev_list, ForwardList *list, ForwardList *next_list, int position);
-
 void forwardlist_search_place(ForwardList *l, Node *n, int position);
 
 void forwardlist_remove_node(ForwardList *line, ForwardList *column, int line_remove, int column_remove);

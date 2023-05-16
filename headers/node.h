@@ -23,8 +23,6 @@ Node *node_construct(data_type value, int line, int column);
 
 data_type node_return_value(Node *n, int coord, int position);
 
-void node_swap_update(Node *n1, int new_coord1, Node *n2, int new_coord2, int position);
-
 void node_destroy(Node* n);
 
 #endif

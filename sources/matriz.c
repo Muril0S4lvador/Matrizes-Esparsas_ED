@@ -96,14 +96,6 @@ void matriz_print(Matriz *m, void (*print_fn)(data_type)){
         actual_column = 0;
 
         while(aux_node != NULL){
-
-            if(aux_node->column > actual_column){
-                actual_column = aux_node->column;
-            } else{
-                prev->next_Column = NULL;
-                break;
-            }
-
             print_fn(aux_node->value);
             prev = aux_node;
             aux_node = aux_node->next_Column;
@@ -137,75 +129,259 @@ void matriz_dense_print(Matriz *m, void (*print_fn)(data_type)){
     printf("\n");
 }
 
-void matriz_swap_columns(Matriz *m, int column1, int column2){
+Matriz *matriz_swap_columns(Matriz *m, int column1, int column2){
     /* A mesma da função swap, reutilizei ela 2x, pois do modo que construi
         a pessoa teria que ter conhecimento de defines de dentro da biblioteca,
         dai separe em duas */
-    matriz_swap(m, column1, column2, COLUMN);
+    return m = matriz_swap(m, column1, column2, COLUMN);
 }
 
-void matriz_swap_lines(Matriz *m, int line1, int line2){
-    matriz_swap(m, line1, line2, LINE);
+Matriz *matriz_swap_lines(Matriz *m, int line1, int line2){
+     return m = matriz_swap(m, line1, line2, LINE);
 }
 
-void matriz_swap(Matriz *m, int num1, int num2, int position){
-    /* O(N^2), pois as funções matriz_sort e node_swap_update requerem uma
-        varregura da lista, até mais de uma vez */
-    ForwardList *l1, *l2, aux;
+Matriz *matriz_swap(Matriz *m, int num1, int num2, int position){
+    /* O(N^2), pois percorre todo a lista de colunas, linha por linha */
+    ForwardList *aux_list;
+    Matriz *m2 = matriz_construct(m->sizeLine, m->sizeColumn);
+    Node *aux_node;
 
-    if(position == COLUMN){
-        l1 = forwardlist_return_list(m->Column, num1-1);
-        l2 = forwardlist_return_list(m->Column, num2-1);
-        
-        node_swap_update(l1->head, num2, l2->head, num1, COLUMN);
+    for(int i = 0; i < m->sizeLine; i++){
+        aux_list = forwardlist_return_list(m->Line, i);
+        aux_node = aux_list->head;
+        while(aux_node){
 
-    } else if(position == LINE){
-        l1 = forwardlist_return_list(m->Line, num1-1);
-        l2 = forwardlist_return_list(m->Line, num2-1);
+            if(position == COLUMN){
+                if(aux_node->column == num1) aux_node->column = num2;
+                if(aux_node->column == num2) aux_node->column = num1;
+            } else if(position == LINE){
+                if(aux_node->line == num1) aux_node->line = num2;
+                if(aux_node->line == num2) aux_node->line = num1;
+            }
 
-        node_swap_update(l1->head, num2, l2->head, num1, LINE);
-    }
-
-    aux.head = l1->head;
-    l1->head = l2->head;
-    l2->head = aux.head;
-
-
-    if(position == COLUMN){
-        matriz_sort(m, l1, COLUMN);
-        matriz_sort(m, l2, COLUMN);
-
-    } else if(position == LINE){
-        matriz_sort(m, l1, LINE);
-        matriz_sort(m, l2, LINE);
-    }
-}
-
-void matriz_sort(Matriz *m, ForwardList *l, int position){
-    /* O(NlogN), pois passa conferindo as linhas dos vetores cada vez */
-    /* Tive que usar assim para nao desordenar a lista */
-    Node *aux = l->head, *atual, *prev, *next;
-    ForwardList *l_aux;
-
-    while(aux){
-
-        if(position == COLUMN){
-            l_aux = forwardlist_return_list(m->Line, aux->line-1);
-            forwardlist_search_place(l_aux, aux, LINE);
-            aux = aux->next_Line;
-
-        } else if(position == LINE){
-            l_aux = forwardlist_return_list(m->Column, aux->column-1);
-            forwardlist_search_place(l_aux, aux, COLUMN);
-            aux = aux->next_Column;
+            matriz_set_value(m2, aux_node->value, aux_node->line, aux_node->column);
+            aux_node = aux_node->next_Column;
         }
     }
+
+    matriz_destroy(m);
+    return m2;
+}
+
+Matriz *matriz_sum(Matriz* m1, Matriz *m2){
+    Matriz *m3;
+    if(m1->sizeLine == m2->sizeLine && m1->sizeColumn == m2->sizeLine)
+        m3 = matriz_construct(m1->sizeLine, m1->sizeColumn);
+
+    else{
+        printf("Arrays must be of the same dimension!\n");
+        return NULL;
+    }
+
+    ForwardList *list_m1, *list_m2;
+    Node *node_m1, *node_m2, node_m3;
+    int value_m1, value_m2;
+
+    for(int l = 0; l < m1->sizeLine; l++){
+        list_m1 = forwardlist_return_list(m1->Line, l);
+        list_m2 = forwardlist_return_list(m2->Line, l);
+
+        node_m1 = list_m1->head;
+        node_m2 = list_m2->head;
+
+        while(node_m1 || node_m2){
+
+            if(node_m1 && !node_m2){
+                matriz_set_value(m3, node_m1->value, node_m1->line, node_m1->column);
+                node_m1 = node_m1->next_Column;
+
+            } else if(!node_m1 && node_m2){
+                matriz_set_value(m3, node_m2->value, node_m2->line, node_m2->column);
+                node_m2 = node_m2->next_Column;
+
+            } else if(node_m1->column > node_m2->column){
+                matriz_set_value(m3, node_m2->value, node_m2->line, node_m2->column);
+                node_m2 = node_m2->next_Column;
+
+            } else if(node_m1->column < node_m2->column){
+                matriz_set_value(m3, node_m1->value, node_m1->line, node_m1->column);
+                node_m1 = node_m1->next_Column;
+                
+            } else if(node_m1->column == node_m2->column){
+                matriz_set_value(m3, node_m1->value + node_m2->value, node_m1->line, node_m1->column);
+                node_m1 = node_m1->next_Column;
+                node_m2 = node_m2->next_Column;
+            }
+        }
+    }
+
+    return m3;
+}
+
+Matriz *matriz_multiply_by_scalar(Matriz *m, data_type scalar){
+
+    ForwardList *aux_list;
+    Node *aux_node;
+    Matriz *m2 = matriz_construct(m->sizeLine, m->sizeColumn);
+
+    for(int i = 0; i < m->sizeLine; i++){
+        aux_list = forwardlist_return_list(m->Line, i);
+        aux_node = aux_list->head;
+
+        while(aux_node != NULL){
+            aux_node->value *= scalar;
+            matriz_set_value(m2, aux_node->value, aux_node->line, aux_node->column);
+            aux_node = aux_node->next_Column;
+        }
+    }
+    matriz_destroy(m);
+    
+    return m2;
+}
+
+Matriz *matriz_transposed(Matriz *m){
+
+    ForwardList *aux_list;
+    Node *aux_node;
+    Matriz *m2 = matriz_construct(m->sizeColumn, m->sizeLine);
+
+    for(int i = 0; i < m->sizeLine; i++){
+        aux_list = forwardlist_return_list(m->Line, i);
+        aux_node = aux_list->head;
+
+        while(aux_node != NULL){
+            matriz_set_value(m2, aux_node->value, aux_node->column, aux_node->line);
+            aux_node = aux_node->next_Column;
+        }
+    }
+    matriz_destroy(m);
+    
+    return m2;
+}
+
+Matriz *matriz_multiply(Matriz *m1, Matriz *m2){
+    if(m1->sizeColumn == m2->sizeLine) return NULL;
+    
+    Matriz *m3 = matriz_construct(m1->sizeLine, m2->sizeColumn);
+    ForwardList *line_m1, *column_m2;
+    Node *n1, *n2;
+    data_type value;
+
+    for(int l = 0; l < m1->sizeLine; l++){
+        line_m1 = forwardlist_return_list(m1->Line, l);
+        n1 = line_m1->head;
+        value = 0;
+
+        for(int c = 0; c < m2->sizeColumn; c++){
+            column_m2 = forwardlist_return_list(m2->Column, c);
+            n2 = column_m2->head;
+
+
+            
+
+            
+        }
+    }
+
+
+}
+
+Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2){
+    Matriz *m3;
+    if(m1->sizeLine == m2->sizeLine && m1->sizeColumn == m2->sizeLine)
+        m3 = matriz_construct(m1->sizeLine, m1->sizeColumn);
+
+    else{
+        printf("Arrays must be of the same dimension!\n");
+        return NULL;
+    }
+
+    ForwardList *list_m1, *list_m2;
+    Node *node_m1, *node_m2, node_m3;
+    int value_m1, value_m2;
+
+    for(int l = 0; l < m1->sizeLine; l++){
+        list_m1 = forwardlist_return_list(m1->Line, l);
+        list_m2 = forwardlist_return_list(m2->Line, l);
+
+        node_m1 = list_m1->head;
+        node_m2 = list_m2->head;
+
+        while(node_m1 && node_m2){
+
+            if(node_m1->column > node_m2->column){
+                node_m2 = node_m2->next_Column;
+
+            } else if(node_m1->column < node_m2->column){
+                node_m1 = node_m1->next_Column;
+                
+            } else if(node_m1->column == node_m2->column){
+                matriz_set_value(m3, node_m1->value * node_m2->value, node_m1->line, node_m1->column);
+                node_m1 = node_m1->next_Column;
+                node_m2 = node_m2->next_Column;
+            }
+        }
+    }
+
+    return m3;
 }
 
 
 
 
 
+
+
+Matriz *matriz_read(){
+    Matriz *m;
+
+    FILE *arq = fopen("Matriz.bin", "rb");
+    int line, column, value;
+
+    fread(&line, sizeof(int), 1, arq);
+    fread(&column, sizeof(int), 1, arq);
+
+    m = matriz_construct(line, column);
+    printf("Linhas %d e colunas %d\n", line, column);
+
+    while(!feof(arq)){
+        fread(&value, 1, sizeof(int),arq);
+        fread(&line, 1, sizeof(int),arq);
+        fread(&column, 1, sizeof(int),arq);
+        matriz_set_value(m, value, line, column);
+    }
+
+    fclose(arq);
+    return m;
+}
+
+void matriz_write(Matriz *m){
+    char *file_name = "Matriz.bin";
+    FILE *arq = fopen(file_name, "wb");
+
+    Node *aux_node;
+    ForwardList *aux_list;
+    int qtd = 0;
+    int line = m->sizeLine, column = m->sizeColumn;
+
+    fwrite(&line, 1, sizeof(int), arq);
+    fwrite(&column, 1, sizeof(int), arq);
+    // fwrite(&qtd, 1, sizeof(int), arq);
+    
+    for(int i = 0; i < m->sizeLine; i++){
+        aux_list = forwardlist_return_list(m->Line, i);
+        aux_node = aux_list->head;
+
+        while(aux_node){
+            fwrite(&aux_node->value, 1, sizeof(int),arq);
+            fwrite(&aux_node->line, 1, sizeof(int),arq);
+            fwrite(&aux_node->column, 1, sizeof(int),arq);
+            aux_node = aux_node->next_Column;
+        }
+    }
+
+    fclose(arq);
+}
 
 void matriz_destroy(Matriz *m){
     /*
