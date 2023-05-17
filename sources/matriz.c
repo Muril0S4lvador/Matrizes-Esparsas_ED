@@ -9,7 +9,7 @@ Matriz *matriz_construct(int line, int column){
         de linhas e colunas
     */
     Matriz *m = (Matriz*) malloc(sizeof(Matriz));
-    
+
     m->sizeColumn = column;
     m->sizeLine = line;
     m->Column = forwardlist_construct(column);
@@ -363,10 +363,15 @@ Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int 
     return m2;
 }
 
+Matriz *matriz_convolution(Matriz *m, Matriz *kernel){
 
+    if ( (kernel->sizeLine - kernel->sizeColumn) || !(kernel->sizeLine % 2) || (kernel->sizeColumn > m->sizeColumn) || (kernel->sizeLine > m->sizeLine) )
+        return NULL;
+    /* ^ Confere se kernel eh quadrado, impar e menor que matriz m ^ */
 
+    Matriz *mc = matriz_construct(m->sizeLine, m->sizeColumn);
 
-
+}
 
 Matriz *matriz_read(){
     Matriz *m;

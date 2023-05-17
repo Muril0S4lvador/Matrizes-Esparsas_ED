@@ -23,7 +23,7 @@ int main(){
 
     matriz_dense_print(m1, print_int);
 
-    m2 = matriz_slice(m1, 4, 2, 8, 7);
+    m2 = matriz_slice(m1, 5, 3, 7, 6);
 
     matriz_dense_print(m2, print_int);
 
