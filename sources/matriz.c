@@ -9,7 +9,7 @@ Matriz *matriz_construct(int line, int column){
         de linhas e colunas
     */
     Matriz *m = (Matriz*) malloc(sizeof(Matriz));
-
+    
     m->sizeColumn = column;
     m->sizeLine = line;
     m->Column = forwardlist_construct(column);
@@ -239,51 +239,44 @@ Matriz *matriz_multiply_by_scalar(Matriz *m, data_type scalar){
     return m2;
 }
 
-Matriz *matriz_transposed(Matriz *m){
-
-    ForwardList *aux_list;
-    Node *aux_node;
-    Matriz *m2 = matriz_construct(m->sizeColumn, m->sizeLine);
-
-    for(int i = 0; i < m->sizeLine; i++){
-        aux_list = forwardlist_return_list(m->Line, i);
-        aux_node = aux_list->head;
-
-        while(aux_node != NULL){
-            matriz_set_value(m2, aux_node->value, aux_node->column, aux_node->line);
-            aux_node = aux_node->next_Column;
-        }
-    }
-    matriz_destroy(m);
-    
-    return m2;
-}
-
 Matriz *matriz_multiply(Matriz *m1, Matriz *m2){
-    if(m1->sizeColumn == m2->sizeLine) return NULL;
+    if(m1->sizeColumn != m2->sizeLine) return NULL;
     
     Matriz *m3 = matriz_construct(m1->sizeLine, m2->sizeColumn);
     ForwardList *line_m1, *column_m2;
     Node *n1, *n2;
-    data_type value;
+    data_type value = 0;
+    int haha = 1;
 
     for(int l = 0; l < m1->sizeLine; l++){
         line_m1 = forwardlist_return_list(m1->Line, l);
-        n1 = line_m1->head;
-        value = 0;
 
         for(int c = 0; c < m2->sizeColumn; c++){
             column_m2 = forwardlist_return_list(m2->Column, c);
+            n1 = line_m1->head;
             n2 = column_m2->head;
+            value = 0;
 
+            while(n1 && n2){
 
-            
+                if(n1->column == n2->line && haha){
+                    value += n1->value * n2->value;
+                    n1 = n1->next_Column;
+                    n2 = n2->next_Line;
 
-            
+                } else if(n1->column > n2->line && haha){
+                    n2 = n2->next_Line;
+
+                } else if(n1->column < n2->line && haha){
+                    n1 = n1->next_Column;
+                }
+            }
+            if(value){
+                matriz_set_value(m3, value, l+1, c+1);
+            }
         }
     }
-
-
+    return m3;
 }
 
 Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2){
@@ -326,6 +319,49 @@ Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2){
     return m3;
 }
 
+Matriz *matriz_transposed(Matriz *m){
+
+    ForwardList *aux_list;
+    Node *aux_node;
+    Matriz *m2 = matriz_construct(m->sizeColumn, m->sizeLine);
+
+    for(int i = 0; i < m->sizeLine; i++){
+        aux_list = forwardlist_return_list(m->Line, i);
+        aux_node = aux_list->head;
+
+        while(aux_node != NULL){
+            matriz_set_value(m2, aux_node->value, aux_node->column, aux_node->line);
+            aux_node = aux_node->next_Column;
+        }
+    }
+    matriz_destroy(m);
+    
+    return m2;
+}
+
+Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int column_inf){
+    if(line_sup > line_inf && column_sup > column_inf){
+        printf("ERROR: Invalid coordinates\n");
+        return NULL;
+    }
+
+    Matriz *m2 = matriz_construct(line_inf - line_sup + 1, column_inf - column_sup + 1);
+    ForwardList *aux_list;
+    Node *n;
+    for(int i = line_sup - 1; i < line_inf; i++){
+        aux_list = forwardlist_return_list(m->Line, i);
+        n = aux_list->head;
+
+        while(n){
+            if(n->column >= column_sup && n->column <= column_inf){
+                matriz_set_value(m2, n->value, n->line - line_sup + 1, n->column - column_sup + 1);
+            }
+            n = n->next_Column;
+            if(n && n->column > column_inf) break;
+        }
+    }
+    return m2;
+}
 
 
 
@@ -337,6 +373,8 @@ Matriz *matriz_read(){
 
     FILE *arq = fopen("Matriz.bin", "rb");
     int line, column, value;
+
+    if(!arq) return NULL;
 
     fread(&line, sizeof(int), 1, arq);
     fread(&column, sizeof(int), 1, arq);

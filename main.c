@@ -8,24 +8,26 @@ void print_int(data_type data){
 
 int main(){
 
-    Matriz *m = matriz_read();
-    matriz_dense_print(m, print_int);
+    Matriz *m1, *m2;
 
-    Matriz *m2 = matriz_construct(3, 3);
+    m1 = matriz_construct(10, 7);
+
+    matriz_set_value(m1, 50, 5, 4);
+    matriz_set_value(m1, 50, 5, 6);
+
+    matriz_set_value(m1, 60, 6, 3);
+    matriz_set_value(m1, 60, 6, 5);
     
-    for(int i = 1; i <= m2->sizeLine; i++){
-        for(int c = 1; c <=m2->sizeColumn; c++){
-            matriz_set_value(m2, 1800, 2, c);
-        }
-    }
+    matriz_set_value(m1, 70, 7, 4);
+    matriz_set_value(m1, 70, 7, 6);
 
-    m2 = matriz_multiply_by_scalar(m2, 27);
+    matriz_dense_print(m1, print_int);
 
-    m2 = matriz_transposed(m2);
+    m2 = matriz_slice(m1, 4, 2, 8, 7);
 
     matriz_dense_print(m2, print_int);
 
-    matriz_write(m2);
+    matriz_destroy(m1);
     matriz_destroy(m2);
 
 

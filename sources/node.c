@@ -39,6 +39,10 @@ data_type node_return_value(Node *n, int coord, int position){
     return aux;
 }
 
+void print_node(Node *n){
+    printf("\nValue %d - [%d ,%d]\n", n->value, n->line, n->column);
+}
+
 
 void node_destroy(Node* n){
     // O(1), pois realiza sempre a mesma função de atribuição e liberação

@@ -24,13 +24,13 @@ Matriz *matriz_transposed(Matriz *m); //
 
 Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2); //
 
-/*  Implementar as abaixo */
-
-Matriz *matriz_multiply(Matriz *m1, Matriz *m2);
+Matriz *matriz_multiply(Matriz *m1, Matriz *m2); //
 
 Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int column_inf);
 
-Matriz *matriz_convolution(Matriz *m, Matriz *kernel);
+/*  Implementar as abaixo */
+
+Matriz *matriz_convolution(Matriz *m, Matriz *kernel); //
 
 /* -------------------^^^^^^^---------------- */
 
