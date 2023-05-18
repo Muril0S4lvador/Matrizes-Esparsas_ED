@@ -23,8 +23,6 @@ Node *node_construct(data_type value, int line, int column);
 
 data_type node_return_value(Node *n, int coord, int position);
 
-void print_node(Node *n);
-
 void node_destroy(Node* n);
 
 #endif

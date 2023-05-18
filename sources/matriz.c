@@ -96,7 +96,9 @@ void matriz_print(Matriz *m, void (*print_fn)(data_type)){
         actual_column = 0;
 
         while(aux_node != NULL){
+            printf("[%d, %d] - ", aux_node->line, aux_node->column);
             print_fn(aux_node->value);
+            printf("| ");
             prev = aux_node;
             aux_node = aux_node->next_Column;
             help = 1;
@@ -132,7 +134,7 @@ void matriz_dense_print(Matriz *m, void (*print_fn)(data_type)){
 Matriz *matriz_swap_columns(Matriz *m, int column1, int column2){
     /* A mesma da função swap, reutilizei ela 2x, pois do modo que construi
         a pessoa teria que ter conhecimento de defines de dentro da biblioteca,
-        dai separe em duas */
+        por isso, separei em duas */
     return m = matriz_swap(m, column1, column2, COLUMN);
 }
 
@@ -141,7 +143,7 @@ Matriz *matriz_swap_lines(Matriz *m, int line1, int line2){
 }
 
 Matriz *matriz_swap(Matriz *m, int num1, int num2, int position){
-    /* O(N^2), pois percorre todo a lista de colunas, linha por linha */
+    /* O(N^2), pois percorre todo a lista de colunas, linha por linha ou vice-versa */
     ForwardList *aux_list;
     Matriz *m2 = matriz_construct(m->sizeLine, m->sizeColumn);
     Node *aux_node;
@@ -169,6 +171,9 @@ Matriz *matriz_swap(Matriz *m, int num1, int num2, int position){
 }
 
 Matriz *matriz_sum(Matriz* m1, Matriz *m2){
+    /* O(N² + M² + X²), pois, na pior das hipoteses, os valores nao nulos de m1 nao estao nos mesmos lugares
+        dos valores nao nulos de m2, fazendo com que a função percorra todos os 
+        nodes definidos nas duas matrizes (considerando N como nodes nao nulos) + tempo da funcao set_value */
     Matriz *m3;
     if(m1->sizeLine == m2->sizeLine && m1->sizeColumn == m2->sizeLine)
         m3 = matriz_construct(m1->sizeLine, m1->sizeColumn);
@@ -219,7 +224,8 @@ Matriz *matriz_sum(Matriz* m1, Matriz *m2){
 }
 
 Matriz *matriz_multiply_by_scalar(Matriz *m, data_type scalar){
-
+    /* O(N + N²), pois a função percorre apenas os elementos nao nulos, somados com
+        o tempo de demora de matriz_set_value */
     ForwardList *aux_list;
     Node *aux_node;
     Matriz *m2 = matriz_construct(m->sizeLine, m->sizeColumn);
@@ -240,6 +246,10 @@ Matriz *matriz_multiply_by_scalar(Matriz *m, data_type scalar){
 }
 
 Matriz *matriz_multiply(Matriz *m1, Matriz *m2){
+    /* O(N² + L + M), sendo L o numero de elementos nao nulos das colunas de m2,
+        M o numero de linhas nao nulas de m1, e N a junção dos dois entrando em set_value,
+        pois a função percorrera toda a coluna nao nula de m2 e linha nao nula de m1, 
+        se ambas foram validas entram em set_value */
     if(m1->sizeColumn != m2->sizeLine) return NULL;
     
     Matriz *m3 = matriz_construct(m1->sizeLine, m2->sizeColumn);
@@ -280,6 +290,7 @@ Matriz *matriz_multiply(Matriz *m1, Matriz *m2){
 }
 
 Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2){
+    /* O(N + M + X²), sendo N e M numero de nao nulos em cada matriz e X² o tempo de adição em outra matriz  */
     Matriz *m3;
     if(m1->sizeLine == m2->sizeLine && m1->sizeColumn == m2->sizeLine)
         m3 = matriz_construct(m1->sizeLine, m1->sizeColumn);
@@ -320,6 +331,8 @@ Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2){
 }
 
 Matriz *matriz_transposed(Matriz *m){
+    /* O(N + X²), sendo N o numero de ponteiros nao nulos na matriz e X² o tempo de demora de set_value, visto que
+        a função apenas percorre os N elementos e os adicionam em outra matriz */
 
     ForwardList *aux_list;
     Node *aux_node;
@@ -340,6 +353,10 @@ Matriz *matriz_transposed(Matriz *m){
 }
 
 Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int column_inf){
+    /* O(N + X²), sendo N o numero de elementos nao nulos da função, que percorrera, no pior dos casos, todos.
+        E X² o tempo de demora de set_value */
+    // printf("\nSup %d, %d\nInf %d, %d\n", line_sup, column_sup, line_inf, column_inf);
+
     if(line_sup > line_inf && column_sup > column_inf){
         printf("ERROR: Invalid coordinates\n");
         return NULL;
@@ -348,13 +365,24 @@ Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int 
     Matriz *m2 = matriz_construct(line_inf - line_sup + 1, column_inf - column_sup + 1);
     ForwardList *aux_list;
     Node *n;
+    int line_new = line_sup -1, column_new = column_sup -1;
+
+    /* Poe limite nos for p/ evitar seg fault */    
+    if(line_sup <= 0) line_sup = 1;
+
+    if(column_sup <= 0) column_sup = 1;
+
+    if(line_inf > m->sizeLine) line_inf = m->sizeLine;
+
+    if(column_inf > m->sizeColumn) column_inf = m->sizeColumn;
+
     for(int i = line_sup - 1; i < line_inf; i++){
         aux_list = forwardlist_return_list(m->Line, i);
         n = aux_list->head;
 
         while(n){
             if(n->column >= column_sup && n->column <= column_inf){
-                matriz_set_value(m2, n->value, n->line - line_sup + 1, n->column - column_sup + 1);
+                matriz_set_value(m2, n->value, n->line - line_new, n->column - column_new);
             }
             n = n->next_Column;
             if(n && n->column > column_inf) break;
@@ -363,20 +391,60 @@ Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int 
     return m2;
 }
 
-Matriz *matriz_convolution(Matriz *m, Matriz *kernel){
-
+Matriz *matriz_convolution(Matriz *m, Matriz *kernel, void (*print_fn)(data_type)){
+    /* O(N * L * M * S * Y * V), pois a função percorre toda da matriz m, todos os elementos nao nulos deles,
+        além de entrar em funções demoradas que demoram, pelo menos N^2 
+        Pensei assim considerando N e L numero de linhas e colunas da matriz m; Demais variaveis o tempo de demora em cada função dentro do while,
+            que no pior dos casos entra todas as vezes em cada uma */
     if ( (kernel->sizeLine - kernel->sizeColumn) || !(kernel->sizeLine % 2) || (kernel->sizeColumn > m->sizeColumn) || (kernel->sizeLine > m->sizeLine) )
         return NULL;
     /* ^ Confere se kernel eh quadrado, impar e menor que matriz m ^ */
 
-    Matriz *mc = matriz_construct(m->sizeLine, m->sizeColumn);
+    Matriz *result = matriz_construct(m->sizeLine, m->sizeColumn), *conv;
+    ForwardList *aux_list;
+    Node *n;
+    data_type sum;
+    int x = kernel->sizeLine/2, line, column;
 
+    for(int l = 0; l < m->sizeLine; l++){
+        aux_list = forwardlist_return_list(m->Line, l);
+        n = aux_list->head;
+        sum = 0;
+
+        while(n){
+            conv = matriz_slice(m, n->line-x, n->column-x, n->line+x, n->column+x);
+            conv = matriz_multiply_point_by_point(conv, kernel);
+            sum = matriz_sum_elements(conv);
+            if(sum) matriz_set_value(result, sum, n->line, n->column);
+            n = n->next_Column;
+        }
+    }
+    return result;
 }
 
-Matriz *matriz_read(){
+data_type matriz_sum_elements(Matriz *m){
+    /* O(N), pois percorre todos os elementos nao nulos da matriz m */
+    ForwardList *aux_list;
+    Node *n;
+    data_type sum = 0;
+    for(int i = 0; i < m->sizeLine; i++){
+        aux_list = forwardlist_return_list(m->Line, i);
+        n = aux_list->head;
+
+        while(n){
+            sum += n->value;
+            n = n->next_Column;
+        }
+    }
+
+    return sum;
+}
+
+Matriz *matriz_read(char *file_name){
+    /* O(N + X²), pois o programa percorre todos os valores nao nulos da matriz m e os adiciona em uma matriz */
     Matriz *m;
 
-    FILE *arq = fopen("Matriz.bin", "rb");
+    FILE *arq = fopen(file_name, "rb");
     int line, column, value;
 
     if(!arq) return NULL;
@@ -398,8 +466,8 @@ Matriz *matriz_read(){
     return m;
 }
 
-void matriz_write(Matriz *m){
-    char *file_name = "Matriz.bin";
+void matriz_write(Matriz *m, char *file_name){
+    /* O(N), pois o programa percorre todos os valores nao nulos da matriz m */
     FILE *arq = fopen(file_name, "wb");
 
     Node *aux_node;
@@ -409,7 +477,6 @@ void matriz_write(Matriz *m){
 
     fwrite(&line, 1, sizeof(int), arq);
     fwrite(&column, 1, sizeof(int), arq);
-    // fwrite(&qtd, 1, sizeof(int), arq);
     
     for(int i = 0; i < m->sizeLine; i++){
         aux_list = forwardlist_return_list(m->Line, i);

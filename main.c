@@ -8,28 +8,37 @@ void print_int(data_type data){
 
 int main(){
 
-    Matriz *m1, *m2;
+    Matriz *m1, *kernel;
+    int x = 2;
+    data_type value;
 
-    m1 = matriz_construct(10, 7);
+    m1 = matriz_construct(6, 6);
 
-    matriz_set_value(m1, 50, 5, 4);
-    matriz_set_value(m1, 50, 5, 6);
-
-    matriz_set_value(m1, 60, 6, 3);
-    matriz_set_value(m1, 60, 6, 5);
-    
-    matriz_set_value(m1, 70, 7, 4);
-    matriz_set_value(m1, 70, 7, 6);
+    for(int l = 1; l <= m1->sizeLine; l++){
+        for(int c = 1; c <= m1->sizeColumn; c++){
+            scanf("%d", &value);
+            matriz_set_value(m1, value, l, c);
+        }
+    }
 
     matriz_dense_print(m1, print_int);
 
-    m2 = matriz_slice(m1, 5, 3, 7, 6);
+    kernel = matriz_construct(3, 3);
+    printf("KERNEL\n");
+    matriz_set_value(kernel, 1, 1, 1);
+    matriz_set_value(kernel, 1, 2, 1);
+    matriz_set_value(kernel, 1, 3, 1);
+    matriz_set_value(kernel, -1, 1, 3);
+    matriz_set_value(kernel, -1, 2, 3);
+    matriz_set_value(kernel, -1, 3, 3);
 
-    matriz_dense_print(m2, print_int);
+    matriz_dense_print(kernel, print_int);
+
+    Matriz *conv = matriz_convolution(m1, kernel, print_int);
+
+    matriz_dense_print(conv, print_int);
 
     matriz_destroy(m1);
-    matriz_destroy(m2);
-
 
     return 0;
 }

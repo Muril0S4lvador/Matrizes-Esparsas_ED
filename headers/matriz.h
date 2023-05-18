@@ -16,27 +16,29 @@ typedef struct{
 
 Matriz *matriz_construct(int line, int column);
 
-Matriz *matriz_sum(Matriz* m1, Matriz *m2); //
+Matriz *matriz_sum(Matriz* m1, Matriz *m2);
 
-Matriz *matriz_multiply_by_scalar(Matriz *m, data_type scalar); //
+Matriz *matriz_multiply_by_scalar(Matriz *m, data_type scalar);
 
-Matriz *matriz_transposed(Matriz *m); //
+Matriz *matriz_transposed(Matriz *m);
 
-Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2); //
+Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2);
 
-Matriz *matriz_multiply(Matriz *m1, Matriz *m2); //
+Matriz *matriz_multiply(Matriz *m1, Matriz *m2);
 
-Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int column_inf); //
+Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int column_inf);
 
 /*  Implementar as abaixo */
 
-Matriz *matriz_convolution(Matriz *m, Matriz *kernel); 
+Matriz *matriz_convolution(Matriz *m, Matriz *kernel, void (*print_fn)(data_type)); 
 
 /* -------------------^^^^^^^---------------- */
 
-Matriz *matriz_read(); //
+data_type matriz_sum_elements(Matriz *m);
 
-void matriz_write(Matriz *m); //
+Matriz *matriz_read(char *file_name);
+
+void matriz_write(Matriz *m, char *file_name);
 
 void matriz_set_value(Matriz *m, data_type value, int line, int column);
 
