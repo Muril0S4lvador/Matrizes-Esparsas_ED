@@ -4,7 +4,7 @@
 #define COLUMN -1
 #define LINE -2
 
-typedef int data_type;
+typedef float data_type;
 
 typedef struct Node{
     // Valor da Coluna

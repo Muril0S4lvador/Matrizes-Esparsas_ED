@@ -28,11 +28,7 @@ Matriz *matriz_multiply(Matriz *m1, Matriz *m2);
 
 Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int column_inf);
 
-/*  Implementar as abaixo */
-
-Matriz *matriz_convolution(Matriz *m, Matriz *kernel, void (*print_fn)(data_type)); 
-
-/* -------------------^^^^^^^---------------- */
+Matriz *matriz_convolution(Matriz *m, Matriz *kernel); 
 
 data_type matriz_sum_elements(Matriz *m);
 

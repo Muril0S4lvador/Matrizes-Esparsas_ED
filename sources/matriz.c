@@ -147,26 +147,28 @@ Matriz *matriz_swap(Matriz *m, int num1, int num2, int position){
     ForwardList *aux_list;
     Matriz *m2 = matriz_construct(m->sizeLine, m->sizeColumn);
     Node *aux_node;
+    int line, column;
 
     for(int i = 0; i < m->sizeLine; i++){
         aux_list = forwardlist_return_list(m->Line, i);
         aux_node = aux_list->head;
         while(aux_node){
+            line = aux_node->line;
+            column = aux_node->column;
 
             if(position == COLUMN){
-                if(aux_node->column == num1) aux_node->column = num2;
-                if(aux_node->column == num2) aux_node->column = num1;
+                if(column == num1) column = num2;
+                else if(column == num2) column = num1;
             } else if(position == LINE){
-                if(aux_node->line == num1) aux_node->line = num2;
-                if(aux_node->line == num2) aux_node->line = num1;
+                if(line == num1) line = num2;
+                else if(line == num2) line = num1;
             }
 
-            matriz_set_value(m2, aux_node->value, aux_node->line, aux_node->column);
+            matriz_set_value(m2, aux_node->value, line, column);
             aux_node = aux_node->next_Column;
         }
     }
 
-    matriz_destroy(m);
     return m2;
 }
 
@@ -240,8 +242,6 @@ Matriz *matriz_multiply_by_scalar(Matriz *m, data_type scalar){
             aux_node = aux_node->next_Column;
         }
     }
-    matriz_destroy(m);
-    
     return m2;
 }
 
@@ -250,7 +250,10 @@ Matriz *matriz_multiply(Matriz *m1, Matriz *m2){
         M o numero de linhas nao nulas de m1, e N a junção dos dois entrando em set_value,
         pois a função percorrera toda a coluna nao nula de m2 e linha nao nula de m1, 
         se ambas foram validas entram em set_value */
-    if(m1->sizeColumn != m2->sizeLine) return NULL;
+    if(m1->sizeColumn != m2->sizeLine){
+        printf("ERROR: Arrays don't combine\n");
+        return NULL;
+    } 
     
     Matriz *m3 = matriz_construct(m1->sizeLine, m2->sizeColumn);
     ForwardList *line_m1, *column_m2;
@@ -326,7 +329,6 @@ Matriz *matriz_multiply_point_by_point(Matriz *m1, Matriz *m2){
             }
         }
     }
-
     return m3;
 }
 
@@ -347,8 +349,6 @@ Matriz *matriz_transposed(Matriz *m){
             aux_node = aux_node->next_Column;
         }
     }
-    matriz_destroy(m);
-    
     return m2;
 }
 
@@ -391,32 +391,28 @@ Matriz *matriz_slice(Matriz *m, int line_sup, int column_sup, int line_inf, int 
     return m2;
 }
 
-Matriz *matriz_convolution(Matriz *m, Matriz *kernel, void (*print_fn)(data_type)){
-    /* O(N * L * M * S * Y * V), pois a função percorre toda da matriz m, todos os elementos nao nulos deles,
-        além de entrar em funções demoradas que demoram, pelo menos N^2 
-        Pensei assim considerando N e L numero de linhas e colunas da matriz m; Demais variaveis o tempo de demora em cada função dentro do while,
-            que no pior dos casos entra todas as vezes em cada uma */
+Matriz *matriz_convolution(Matriz *m, Matriz *kernel){
+    /* O(N * L * M * S), pois a função percorre toda da matriz m, todos os elementos dela,
+        e todos os elementos do kernel */
     if ( (kernel->sizeLine - kernel->sizeColumn) || !(kernel->sizeLine % 2) || (kernel->sizeColumn > m->sizeColumn) || (kernel->sizeLine > m->sizeLine) )
         return NULL;
     /* ^ Confere se kernel eh quadrado, impar e menor que matriz m ^ */
 
-    Matriz *result = matriz_construct(m->sizeLine, m->sizeColumn), *conv;
+    Matriz *result = matriz_construct(m->sizeLine, m->sizeColumn), *conv, *mult;
     ForwardList *aux_list;
     Node *n;
     data_type sum;
-    int x = kernel->sizeLine/2, line, column;
+    int x = kernel->sizeLine/2;
 
     for(int l = 0; l < m->sizeLine; l++){
-        aux_list = forwardlist_return_list(m->Line, l);
-        n = aux_list->head;
-        sum = 0;
 
-        while(n){
-            conv = matriz_slice(m, n->line-x, n->column-x, n->line+x, n->column+x);
-            conv = matriz_multiply_point_by_point(conv, kernel);
-            sum = matriz_sum_elements(conv);
-            if(sum) matriz_set_value(result, sum, n->line, n->column);
-            n = n->next_Column;
+        for(int c = 0; c < m->sizeColumn; c++){
+            conv = matriz_slice(m, l-x+1, c-x+1, l+x+1, c+x+1);
+            mult = matriz_multiply_point_by_point(conv, kernel);
+            sum = matriz_sum_elements(mult);
+            if(sum) matriz_set_value(result, sum, l+1, c+1);
+            matriz_destroy(conv);
+            matriz_destroy(mult);
         }
     }
     return result;
@@ -436,7 +432,6 @@ data_type matriz_sum_elements(Matriz *m){
             n = n->next_Column;
         }
     }
-
     return sum;
 }
 
@@ -445,20 +440,23 @@ Matriz *matriz_read(char *file_name){
     Matriz *m;
 
     FILE *arq = fopen(file_name, "rb");
-    int line, column, value;
+    int line, column;
+    data_type value;
 
-    if(!arq) return NULL;
+    if(!arq){
+        printf("Can't find %s\n", file_name);
+        return NULL;
+    }
 
     fread(&line, sizeof(int), 1, arq);
     fread(&column, sizeof(int), 1, arq);
 
     m = matriz_construct(line, column);
-    printf("Linhas %d e colunas %d\n", line, column);
 
     while(!feof(arq)){
-        fread(&value, 1, sizeof(int),arq);
-        fread(&line, 1, sizeof(int),arq);
-        fread(&column, 1, sizeof(int),arq);
+        fread(&value, sizeof(data_type), 1,arq);
+        fread(&line, sizeof(int), 1,arq);
+        fread(&column, sizeof(int), 1,arq);
         matriz_set_value(m, value, line, column);
     }
 
@@ -475,17 +473,17 @@ void matriz_write(Matriz *m, char *file_name){
     int qtd = 0;
     int line = m->sizeLine, column = m->sizeColumn;
 
-    fwrite(&line, 1, sizeof(int), arq);
-    fwrite(&column, 1, sizeof(int), arq);
+    fwrite(&line, sizeof(int), 1, arq);
+    fwrite(&column, sizeof(int), 1, arq);
     
     for(int i = 0; i < m->sizeLine; i++){
         aux_list = forwardlist_return_list(m->Line, i);
         aux_node = aux_list->head;
 
         while(aux_node){
-            fwrite(&aux_node->value, 1, sizeof(int),arq);
-            fwrite(&aux_node->line, 1, sizeof(int),arq);
-            fwrite(&aux_node->column, 1, sizeof(int),arq);
+            fwrite(&aux_node->value,sizeof(data_type), 1,arq);
+            fwrite(&aux_node->line, sizeof(int), 1,arq);
+            fwrite(&aux_node->column, sizeof(int), 1,arq);
             aux_node = aux_node->next_Column;
         }
     }
